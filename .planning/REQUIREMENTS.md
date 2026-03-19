@@ -61,7 +61,7 @@ Explicitly excluded. Documented to prevent scope creep.
 
 | Feature | Reason |
 |---------|--------|
-| Live camera feed streaming | Not needed — just counts and data. Bandwidth and privacy concerns. |
+| Live camera feed streaming | Not needed -- just counts and data. Bandwidth and privacy concerns. |
 | Push notifications to phone | Adds service worker complexity. Deferred to v2+. |
 | Multi-user accounts / OAuth | Single-user system. Unnecessary complexity. |
 | Egg weight measurement | Requires hardware scale. Visual estimation is the chosen approach. |
@@ -74,23 +74,23 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DET-01 | — | Pending |
-| DET-02 | — | Pending |
-| DET-03 | — | Pending |
-| DET-04 | — | Pending |
-| DASH-01 | — | Pending |
-| DASH-02 | — | Pending |
-| DASH-03 | — | Pending |
-| DASH-04 | — | Pending |
-| DATA-01 | — | Pending |
-| INFRA-01 | — | Pending |
-| INFRA-02 | — | Pending |
+| DET-01 | Phase 1 | Pending |
+| DET-02 | Phase 1 | Pending |
+| DET-03 | Phase 1 | Pending |
+| DET-04 | Phase 1 | Pending |
+| DASH-01 | Phase 3 | Pending |
+| DASH-02 | Phase 3 | Pending |
+| DASH-03 | Phase 3 | Pending |
+| DASH-04 | Phase 3 | Pending |
+| DATA-01 | Phase 2 | Pending |
+| INFRA-01 | Phase 4 | Pending |
+| INFRA-02 | Phase 4 | Pending |
 
 **Coverage:**
 - v1 requirements: 11 total
-- Mapped to phases: 0
-- Unmapped: 11
+- Mapped to phases: 11
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-19*
-*Last updated: 2026-03-19 after initial definition*
+*Last updated: 2026-03-19 after roadmap creation*
