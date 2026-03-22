@@ -164,7 +164,7 @@ class TestCollection:
     """When all tracked eggs leave the zone, emit eggs_collected event."""
 
     def test_all_eggs_leave_triggers_collection(self) -> None:
-        tracker = EggTracker(stability_seconds=3.0)
+        tracker = EggTracker(stability_seconds=3.0, collection_timeout=5.0)
         box = [100, 50, 200, 150]
 
         # Count an egg
@@ -172,14 +172,15 @@ class TestCollection:
         tracker.process_detections([1], [box], [True], 3.0)
         assert tracker.egg_count == 1
 
-        # All eggs disappear (farmer collected them)
-        events = tracker.process_detections([], [], [], 10.0)
+        # All eggs disappear (farmer collected them) -- wait beyond collection timeout
+        # Last detection was at t=3.0, so t=8.0 is 5s later (>= collection_timeout)
+        events = tracker.process_detections([], [], [], 8.0)
         collected_events = [e for e in events if e["action"] == "collected"]
         assert len(collected_events) == 1
         assert collected_events[0]["count"] == 1
 
     def test_counted_ids_pruned_after_collection(self) -> None:
-        tracker = EggTracker(stability_seconds=3.0)
+        tracker = EggTracker(stability_seconds=3.0, collection_timeout=5.0)
         box = [100, 50, 200, 150]
 
         # Count an egg
@@ -187,8 +188,8 @@ class TestCollection:
         tracker.process_detections([1], [box], [True], 3.0)
         assert tracker.egg_count == 1
 
-        # Collection event
-        tracker.process_detections([], [], [], 10.0)
+        # Collection event (last detection at t=3, empty at t=8 = 5s gap)
+        tracker.process_detections([], [], [], 8.0)
         assert tracker.egg_count == 0
 
         # New egg should start fresh
