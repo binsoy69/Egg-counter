@@ -125,21 +125,21 @@ class TestDaylightScheduler:
     """Tests for egg_counter.scheduler module."""
 
     def test_is_daylight_daytime(self):
-        """is_daylight returns True when mocked time is noon."""
+        """is_daylight returns True when mocked time is noon local (16:00 UTC)."""
         from egg_counter.scheduler import is_daylight
 
-        with patch("egg_counter.scheduler.datetime") as mock_dt:
-            mock_dt.now.return_value = datetime(2026, 6, 21, 12, 0, 0, tzinfo=timezone.utc)
-            mock_dt.side_effect = lambda *a, **kw: datetime(*a, **kw)
+        # Noon EDT = 16:00 UTC on June 21 at lat 40, lon -75
+        noon_utc = datetime(2026, 6, 21, 16, 0, 0, tzinfo=timezone.utc)
+        with patch("egg_counter.scheduler._utcnow", return_value=noon_utc):
             result = is_daylight(40.0, -75.0)
             assert result is True
 
     def test_is_daylight_nighttime(self):
-        """is_daylight returns False when mocked time is midnight."""
+        """is_daylight returns False when mocked time is midnight local (04:00 UTC)."""
         from egg_counter.scheduler import is_daylight
 
-        with patch("egg_counter.scheduler.datetime") as mock_dt:
-            mock_dt.now.return_value = datetime(2026, 6, 21, 4, 0, 0, tzinfo=timezone.utc)
-            mock_dt.side_effect = lambda *a, **kw: datetime(*a, **kw)
+        # Midnight EDT = 04:00 UTC on June 21 at lat 40, lon -75
+        midnight_utc = datetime(2026, 6, 21, 4, 0, 0, tzinfo=timezone.utc)
+        with patch("egg_counter.scheduler._utcnow", return_value=midnight_utc):
             result = is_daylight(40.0, -75.0)
             assert result is False
