@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "egg-counter"
+version = "0.1.0"
+description = "Real-time egg counting and size classification for hobby farms"
+requires-python = ">=3.11"
+dependencies = [
+    "ultralytics>=8.4.24",
+    "opencv-python-headless>=4.0",
+    "numpy>=1.24",
+    "astral>=3.0",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[project.scripts]
+egg-counter = "egg_counter.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
