@@ -12,7 +12,7 @@ This project builds a real-time egg counting and size classification system on a
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Detection Pipeline** - YOLO-based egg detection, tracking, and size classification running on the Pi
+- [x] **Phase 1: Detection Pipeline** - YOLO-based egg detection, tracking, and size classification running on the Pi
 - [ ] **Phase 2: Data Persistence** - SQLite storage of egg events with historical data and daily aggregation
 - [ ] **Phase 3: Web Dashboard** - Live mobile-friendly dashboard showing counts, size breakdown, and trends
 - [ ] **Phase 4: Remote Access and Hardening** - Cloudflare Tunnel for remote phone access and systemd for production reliability
@@ -33,7 +33,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 Plans:
 - [ ] 01-01-PLAN.md — Project scaffolding, config, zone, logger, scheduler, and zone setup tool
 - [ ] 01-02-PLAN.md — Size classifier (bbox ratio method) and egg tracker (de-duplication, stability, restart)
-- [ ] 01-03-PLAN.md — YOLO detector wrapper, pipeline integration, and CLI entry point
+- [x] 01-03-PLAN.md — YOLO detector wrapper, pipeline integration, and CLI entry point
 
 ### Phase 2: Data Persistence
 **Goal**: Egg detection events are durably stored and queryable, surviving reboots and power loss
@@ -84,7 +84,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Detection Pipeline | 0/3 | Planning complete | - |
+| 1. Detection Pipeline | 3/3 | Complete | 2026-03-23 |
 | 2. Data Persistence | 0/0 | Not started | - |
 | 3. Web Dashboard | 0/0 | Not started | - |
 | 4. Remote Access and Hardening | 0/0 | Not started | - |

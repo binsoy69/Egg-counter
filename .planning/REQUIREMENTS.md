@@ -9,10 +9,10 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Detection
 
-- [ ] **DET-01**: User can detect eggs in nest box using YOLO11n model on Raspberry Pi 5
-- [ ] **DET-02**: System de-duplicates detections so each physical egg is counted exactly once (ByteTrack tracking)
-- [ ] **DET-03**: System classifies egg size (small, medium, large, jumbo) via visual estimation from bounding box dimensions
-- [ ] **DET-04**: Each detection is logged with timestamp and size classification
+- [x] **DET-01**: User can detect eggs in nest box using YOLO11n model on Raspberry Pi 5
+- [x] **DET-02**: System de-duplicates detections so each physical egg is counted exactly once (ByteTrack tracking)
+- [x] **DET-03**: System classifies egg size (small, medium, large, jumbo) via visual estimation from bounding box dimensions
+- [x] **DET-04**: Each detection is logged with timestamp and size classification
 
 ### Dashboard
 
@@ -74,10 +74,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DET-01 | Phase 1 | Pending |
-| DET-02 | Phase 1 | Pending |
-| DET-03 | Phase 1 | Pending |
-| DET-04 | Phase 1 | Pending |
+| DET-01 | Phase 1 | Complete |
+| DET-02 | Phase 1 | Complete |
+| DET-03 | Phase 1 | Complete |
+| DET-04 | Phase 1 | Complete |
 | DASH-01 | Phase 3 | Pending |
 | DASH-02 | Phase 3 | Pending |
 | DASH-03 | Phase 3 | Pending |
