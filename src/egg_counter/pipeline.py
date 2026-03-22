@@ -171,8 +171,8 @@ class EggCounterPipeline:
 
         # Get location for daylight scheduling (optional)
         location = self.settings.get("location", {})
-        lat = location.get("latitude")
-        lon = location.get("longitude")
+        lat = location.get("lat")
+        lon = location.get("lon")
         use_daylight = lat is not None and lon is not None
 
         try:
