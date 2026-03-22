@@ -1,0 +1,10 @@
+# Dataset config for single-class egg detection
+# Place training images in data/dataset/images/train/
+# Place validation images in data/dataset/images/val/
+# Labels in YOLO format in data/dataset/labels/train/ and val/
+path: .
+train: images/train
+val: images/val
+
+names:
+  0: egg

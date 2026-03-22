@@ -1,0 +1,12 @@
+# Dataset config for multi-class egg size detection
+# Use this config to train a model that directly classifies size
+# Compare accuracy with the bbox ratio method to determine best approach (D-01/D-02)
+path: .
+train: images/train
+val: images/val
+
+names:
+  0: egg-small
+  1: egg-medium
+  2: egg-large
+  3: egg-jumbo
