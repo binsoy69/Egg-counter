@@ -3,7 +3,7 @@ status: complete
 phase: 01-detection-pipeline
 source: [01-VERIFICATION.md]
 started: 2026-03-23T00:00:00Z
-updated: 2026-03-23T16:00:00Z
+updated: 2026-03-23T17:00:00Z
 ---
 
 ## Current Test
@@ -30,16 +30,15 @@ expected: Running `egg-counter preview --model <path> --camera 0` opens an OpenC
 result: pass
 
 ### 5. Preview Video Playback Mode
-expected: Running `egg-counter preview --model <path> --video <file>` plays back video with detection overlays at correct frame rate, exits cleanly on 'q' or ESC
-result: issue
-reported: "I should be also be able to setup zone for videos"
-severity: major
+expected: Running `egg-counter preview --model <path> --video <file>` plays back video with detection overlays at correct frame rate, exits cleanly on 'q' or ESC. Zone setup also works with `--video` flag.
+result: pass
+note: Previously reported "zone setup needs video support" — gap closed by plan 01-05
 
 ## Summary
 
 total: 5
-passed: 4
-issues: 1
+passed: 5
+issues: 0
 pending: 0
 skipped: 0
 blocked: 0
@@ -57,12 +56,11 @@ blocked: 0
   debug_session: ""
 
 - truth: "Zone setup tool supports video file input in addition to live camera"
-  status: diagnosed
-  reason: "User reported: I should be also be able to setup zone for videos"
+  status: resolved
+  reason: "Plan 01-05 added --video flag to setup_zone.py. User confirmed working."
   severity: major
   test: 5
   root_cause: "setup_zone.py only has --camera-index flag. No --video option exists to read a frame from a video file."
-  artifacts: [tools/setup_zone.py]
-  missing:
-    - "tools/setup_zone.py accepts --video <file> flag to load a frame from video instead of camera"
+  artifacts: [tools/setup_zone.py, tests/test_setup_zone.py]
+  missing: []
   debug_session: ""
