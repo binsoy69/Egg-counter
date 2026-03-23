@@ -14,7 +14,7 @@ def load_settings(path: str = "config/settings.yaml") -> dict:
 
     Returns:
         Dict with keys: camera_index, confidence_threshold, stability_seconds,
-        log_dir, location, frame_rate, bytetrack_config.
+        log_dir, db_path, location, frame_rate, bytetrack_config.
     """
     with open(path, "r") as f:
         return yaml.safe_load(f)

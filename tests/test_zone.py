@@ -45,6 +45,7 @@ class TestConfig:
         assert "camera_index" in settings
         assert "confidence_threshold" in settings
         assert "log_dir" in settings
+        assert "db_path" in settings
         assert "location" in settings
         assert settings["confidence_threshold"] == 0.5
 
