@@ -166,3 +166,40 @@ def create_app(
             hub.disconnect(websocket)
 
     return app
+
+
+def make_event_bridge(app: FastAPI) -> callable:
+    """Create a callback that forwards pipeline events to WebSocket clients.
+
+    Returns a synchronous function suitable for use as EggCounterPipeline's
+    event_callback parameter. Each call rebuilds the dashboard snapshot
+    and broadcasts the event to all connected WebSocket clients.
+    """
+    hub = _get_hub(app)
+    db_path = app.state.settings.get("db_path", "data/eggs.db")
+
+    def bridge(log_entry: dict) -> None:
+        repo = EggRepository(db_path)
+        try:
+            snapshot = repo.get_dashboard_snapshot(date.today(), "weekly")
+        finally:
+            repo.close()
+
+        event_type = log_entry.get("type", "unknown")
+        toast = None
+        if event_type == "egg_detected":
+            toast = "1 new egg added"
+        elif event_type == "eggs_collected":
+            count = log_entry.get("count", 0)
+            toast = f"{count} eggs collected"
+
+        event = hub.build_snapshot_event(event_type, snapshot, toast=toast)
+        hub.broadcast_json_sync(event)
+
+    return bridge
+
+
+def run_server(app: FastAPI, host: str = "0.0.0.0", port: int = 8000) -> None:
+    """Start the uvicorn server with the given app."""
+    import uvicorn
+    uvicorn.run(app, host=host, port=port)

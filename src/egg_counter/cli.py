@@ -77,6 +77,48 @@ def main() -> None:
         help="Path to a video file (use instead of camera for testing)",
     )
 
+    # --- serve command ---
+    serve_parser = subparsers.add_parser(
+        "serve", help="Start web dashboard server with optional live detection"
+    )
+    serve_parser.add_argument(
+        "--model",
+        default=None,
+        help="Path to YOLO model (enables live detection pipeline)",
+    )
+    serve_parser.add_argument(
+        "--camera",
+        type=int,
+        default=None,
+        help="Camera index (default: from settings.yaml)",
+    )
+    serve_parser.add_argument(
+        "--config",
+        default="config/settings.yaml",
+        help="Path to settings.yaml (default: config/settings.yaml)",
+    )
+    serve_parser.add_argument(
+        "--zone",
+        default="config/zone.json",
+        help="Path to zone.json (default: config/zone.json)",
+    )
+    serve_parser.add_argument(
+        "--video",
+        default=None,
+        help="Path to a video file (use instead of camera for testing)",
+    )
+    serve_parser.add_argument(
+        "--host",
+        default=None,
+        help="Server host (default: from settings.yaml or 0.0.0.0)",
+    )
+    serve_parser.add_argument(
+        "--port",
+        type=int,
+        default=None,
+        help="Server port (default: from settings.yaml or 8000)",
+    )
+
     # --- setup-zone command ---
     zone_parser = subparsers.add_parser(
         "setup-zone", help="Run zone configuration tool"
@@ -118,6 +160,28 @@ def main() -> None:
             config_path=args.config,
             zone_path=args.zone,
         )
+
+    elif args.command == "serve":
+        settings = load_settings(args.config)
+        zone_config = load_zone_config(args.zone)
+        host = args.host or settings.get("web_host", "0.0.0.0")
+        port = args.port or settings.get("web_port", 8000)
+
+        from egg_counter.web.server import create_app, make_event_bridge, run_server
+
+        pipeline = None
+        if args.model:
+            event_bridge = None  # will be set after app creation
+            pipeline = EggCounterPipeline(settings, zone_config)
+
+        app = create_app(settings, zone_config, pipeline=pipeline)
+
+        if pipeline is not None:
+            event_bridge = make_event_bridge(app)
+            pipeline.event_callback = event_bridge
+
+        print(f"Starting EggSentry dashboard at http://{host}:{port}")
+        run_server(app, host=host, port=port)
 
     elif args.command == "setup-zone":
         subprocess.run(
