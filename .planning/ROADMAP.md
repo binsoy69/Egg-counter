@@ -28,12 +28,13 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. An egg sitting in the nest box for minutes or hours is counted exactly once, not repeatedly
   3. Each detected egg is classified as small, medium, large, or jumbo based on its visual size
   4. Each detection event is logged with a timestamp and size classification to stdout or a log file
-**Plans**: 3 plans
+**Plans**: 4 plans
 
 Plans:
 - [ ] 01-01-PLAN.md — Project scaffolding, config, zone, logger, scheduler, and zone setup tool
 - [ ] 01-02-PLAN.md — Size classifier (bbox ratio method) and egg tracker (de-duplication, stability, restart)
 - [x] 01-03-PLAN.md — YOLO detector wrapper, pipeline integration, and CLI entry point
+- [ ] 01-04-PLAN.md — GUI preview mode for visual verification (gap closure)
 
 ### Phase 2: Data Persistence
 **Goal**: Egg detection events are durably stored and queryable, surviving reboots and power loss
@@ -84,7 +85,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Detection Pipeline | 3/3 | Complete | 2026-03-23 |
+| 1. Detection Pipeline | 3/4 | Gap closure | - |
 | 2. Data Persistence | 0/0 | Not started | - |
 | 3. Web Dashboard | 0/0 | Not started | - |
 | 4. Remote Access and Hardening | 0/0 | Not started | - |
