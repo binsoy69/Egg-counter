@@ -13,6 +13,7 @@ def _make_settings():
     """Return minimal settings dict for testing."""
     return {
         "stability_seconds": 3,
+        "db_path": "data/eggs.db",
         "log_dir": "logs",
         "frame_rate": 3,
         "confidence_threshold": 0.5,
@@ -31,12 +32,25 @@ def _make_zone_config():
     }
 
 
+@patch("egg_counter.pipeline.EggDatabaseLogger")
 @patch("egg_counter.pipeline.EggDetector")
-def test_process_frame_new_egg(mock_detector_cls):
+def test_process_frame_new_egg(mock_detector_cls, mock_logger_cls):
     """After stability period, a new egg in zone is logged as egg_detected."""
     settings = _make_settings()
     settings["stability_seconds"] = 0  # Instant stability for test
     zone_config = _make_zone_config()
+    mock_logger = mock_logger_cls.return_value
+    mock_logger.log_egg_detected.return_value = {
+        "type": "egg_detected",
+        "timestamp": "2026-03-23T00:00:00+00:00",
+        "track_id": 1,
+        "size": "large",
+        "confidence": 0.85,
+        "bbox": [200, 200, 400, 300],
+        "size_method": "bbox_ratio",
+        "raw_measurement_mm": 60.0,
+        "frame_number": 2,
+    }
     pipeline = EggCounterPipeline(settings, zone_config)
 
     # Create mock detector
@@ -62,12 +76,14 @@ def test_process_frame_new_egg(mock_detector_cls):
     assert len(events) == 1
     assert events[0]["type"] == "egg_detected"
     assert events[0]["track_id"] == 1
-    assert events[0]["size"] in ("small", "medium", "large", "jumbo")
+    assert events[0]["size"] == "large"
     assert events[0]["size_method"] == "bbox_ratio"
+    mock_logger.log_egg_detected.assert_called_once()
 
 
+@patch("egg_counter.pipeline.EggDatabaseLogger")
 @patch("egg_counter.pipeline.EggDetector")
-def test_process_frame_out_of_zone(mock_detector_cls):
+def test_process_frame_out_of_zone(mock_detector_cls, mock_logger_cls):
     """Detections outside the zone do not generate events."""
     settings = _make_settings()
     settings["stability_seconds"] = 0
@@ -88,10 +104,12 @@ def test_process_frame_out_of_zone(mock_detector_cls):
 
     events = pipeline.process_frame(MagicMock(), 0.0)
     assert len(events) == 0
+    mock_logger_cls.return_value.log_egg_detected.assert_not_called()
 
 
+@patch("egg_counter.pipeline.EggDatabaseLogger")
 @patch("egg_counter.pipeline.EggDetector")
-def test_pipeline_restart_initialization(mock_detector_cls):
+def test_pipeline_restart_initialization(mock_detector_cls, mock_logger_cls):
     """On restart, existing eggs are marked as counted without emitting events."""
     settings = _make_settings()
     zone_config = _make_zone_config()
@@ -117,12 +135,25 @@ def test_pipeline_restart_initialization(mock_detector_cls):
     assert 2 in pipeline.tracker.counted_ids
 
 
+@patch("egg_counter.pipeline.EggDatabaseLogger")
 @patch("egg_counter.pipeline.EggDetector")
-def test_process_frame_stability_timing(mock_detector_cls):
+def test_process_frame_stability_timing(mock_detector_cls, mock_logger_cls):
     """Egg must remain in zone for stability_seconds before being counted."""
     settings = _make_settings()
     settings["stability_seconds"] = 3
     zone_config = _make_zone_config()
+    mock_logger = mock_logger_cls.return_value
+    mock_logger.log_egg_detected.return_value = {
+        "type": "egg_detected",
+        "timestamp": "2026-03-23T00:00:00+00:00",
+        "track_id": 1,
+        "size": "large",
+        "confidence": 0.85,
+        "bbox": [200, 200, 400, 300],
+        "size_method": "bbox_ratio",
+        "raw_measurement_mm": 60.0,
+        "frame_number": 3,
+    }
     pipeline = EggCounterPipeline(settings, zone_config)
 
     mock_detector = MagicMock()
@@ -151,3 +182,4 @@ def test_process_frame_stability_timing(mock_detector_cls):
     events = pipeline.process_frame(MagicMock(), 3.0)
     assert len(events) == 1
     assert events[0]["type"] == "egg_detected"
+    mock_logger.log_egg_detected.assert_called_once()

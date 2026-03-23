@@ -12,8 +12,8 @@ import time
 import cv2
 
 from egg_counter.config import load_settings, load_zone_config
+from egg_counter.db import EggDatabaseLogger
 from egg_counter.detector import EggDetector
-from egg_counter.logger import EggEventLogger
 from egg_counter.scheduler import is_daylight, wait_for_daylight
 from egg_counter.size_classifier import SizeClassifier
 from egg_counter.tracker import EggTracker
@@ -41,7 +41,7 @@ class EggCounterPipeline:
             stability_seconds=settings.get("stability_seconds", 3),
         )
         self.classifier = SizeClassifier(zone_config)
-        self.logger = EggEventLogger(settings.get("log_dir", "logs"))
+        self.logger = EggDatabaseLogger(settings.get("db_path", "data/eggs.db"))
         self.running = False
         self.frame_rate = settings.get("frame_rate", 3)
 
@@ -223,6 +223,8 @@ class EggCounterPipeline:
                 time.sleep(1.0 / self.frame_rate)
         finally:
             cap.release()
+            if hasattr(self.logger, "close"):
+                self.logger.close()
             print("Egg Counter stopped.")
 
     def stop(self) -> None:
