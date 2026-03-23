@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: Human verification required
-stopped_at: Phase 2 hardware reboot durability check pending
-last_updated: "2026-03-23T13:33:39.5724494Z"
+status: Ready to execute
+stopped_at: Completed 03-01-PLAN.md
+last_updated: "2026-03-23T15:28:45.422Z"
 progress:
   total_phases: 4
-  completed_phases: 1
-  total_plans: 6
+  completed_phases: 2
+  total_plans: 8
   completed_plans: 6
 ---
 
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-19)
 
 **Core value:** Accurately count and classify eggs as they appear in nest boxes, with live results visible on a remote-accessible dashboard.
-**Current focus:** Phase 02 — data-persistence verification
+**Current focus:** Phase 03 — web-dashboard
 
 ## Current Position
 
-Phase: 02 (data-persistence) — AWAITING HUMAN VERIFICATION
-Plan: 1 of 1 complete
+Phase: 03 (web-dashboard) — EXECUTING
+Plan: 2 of 2
 
 ## Performance Metrics
 
@@ -50,6 +50,7 @@ Plan: 1 of 1 complete
 *Updated after each plan completion*
 | Phase 01 P04 | 3min | 2 tasks | 3 files |
 | Phase 01 P05 | 2min | 1 tasks | 2 files |
+| Phase 03 P01 | 13min | 3 tasks | 12 files |
 
 ## Accumulated Context
 
@@ -71,6 +72,9 @@ Recent decisions affecting current work:
 - [Phase 02]: Replaced JSONL pipeline logging with SQLite WAL persistence via EggDatabaseLogger
 - [Phase 02]: Startup egg_count restoration is collection-aware and derived from SQLite state
 - [Phase 02]: Added EggRepository query layer for Phase 3 dashboard history views
+- [Phase 03]: Manual collection_mode skips tracker-generated collection events; only POST /api/collect persists
+- [Phase 03]: Dashboard snapshot post-collection running count uses MAX(timestamp) from collection_events
+- [Phase 03]: Async broadcast_json for route contexts, sync broadcast_json_sync for pipeline callback contexts
 
 ### Pending Todos
 
@@ -84,6 +88,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-23T13:33:39.5724494Z
-Stopped at: Phase 2 hardware reboot durability check pending
-Resume file: .planning/phases/02-data-persistence/02-CONTEXT.md
+Last session: 2026-03-23T15:28:45.418Z
+Stopped at: Completed 03-01-PLAN.md
+Resume file: None

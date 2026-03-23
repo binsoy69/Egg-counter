@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import sys
 import time
+from typing import Callable
 
 import cv2
 
@@ -27,12 +28,18 @@ class EggCounterPipeline:
     zone filtering, stability timing, size classification, and event logging.
     """
 
-    def __init__(self, settings: dict, zone_config: dict) -> None:
+    def __init__(
+        self,
+        settings: dict,
+        zone_config: dict,
+        event_callback: Callable[[dict], None] | None = None,
+    ) -> None:
         """Initialize the pipeline with settings and zone configuration.
 
         Args:
             settings: Application settings dict from settings.yaml.
             zone_config: Zone configuration dict from zone.json.
+            event_callback: Optional callback invoked with each logged event dict.
         """
         self.settings = settings
         self.zone_config = zone_config
@@ -44,6 +51,8 @@ class EggCounterPipeline:
         self.logger = EggDatabaseLogger(settings.get("db_path", "data/eggs.db"))
         self.running = False
         self.frame_rate = settings.get("frame_rate", 3)
+        self.event_callback = event_callback
+        self.collection_mode = settings.get("collection_mode", "auto")
 
     def setup(self, model_path: str) -> None:
         """Initialize the YOLO detector.
@@ -133,12 +142,21 @@ class EggCounterPipeline:
                     frame_number=detector_result["frame_number"],
                 )
                 logged_events.append(log_entry)
+                if self.event_callback is not None:
+                    self.event_callback(log_entry)
 
             elif event["action"] == "collected":
+                # In manual collection_mode, only the dashboard POST /api/collect
+                # may persist collection events. Tracker-generated collections
+                # are skipped to avoid double-counting.
+                if self.collection_mode == "manual":
+                    continue
                 log_entry = self.logger.log_eggs_collected(
                     count=event["count"],
                 )
                 logged_events.append(log_entry)
+                if self.event_callback is not None:
+                    self.event_callback(log_entry)
 
         return logged_events
 

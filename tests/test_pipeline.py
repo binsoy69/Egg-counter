@@ -83,6 +83,92 @@ def test_process_frame_new_egg(mock_detector_cls, mock_logger_cls):
 
 @patch("egg_counter.pipeline.EggDatabaseLogger")
 @patch("egg_counter.pipeline.EggDetector")
+def test_event_callback_fires_on_new_egg(mock_detector_cls, mock_logger_cls):
+    """event_callback is called with each logged event."""
+    settings = _make_settings()
+    settings["stability_seconds"] = 0
+    zone_config = _make_zone_config()
+    mock_logger = mock_logger_cls.return_value
+    mock_logger.log_egg_detected.return_value = {
+        "type": "egg_detected",
+        "track_id": 1,
+        "size": "large",
+    }
+
+    callback = MagicMock()
+    pipeline = EggCounterPipeline(settings, zone_config, event_callback=callback)
+
+    mock_detector = MagicMock()
+    pipeline.detector = mock_detector
+    mock_detector.detect_and_track.return_value = {
+        "track_ids": [1],
+        "boxes": [[200, 200, 400, 300]],
+        "confidences": [0.85],
+        "classes": [0],
+        "frame_number": 1,
+    }
+
+    pipeline.process_frame(MagicMock(), 0.0)  # first sight
+    mock_detector.detect_and_track.return_value["frame_number"] = 2
+    pipeline.process_frame(MagicMock(), 0.0)  # counted
+
+    callback.assert_called_once()
+    assert callback.call_args[0][0]["type"] == "egg_detected"
+
+
+@patch("egg_counter.pipeline.EggDatabaseLogger")
+@patch("egg_counter.pipeline.EggDetector")
+def test_manual_collection_mode_skips_tracker_collection(
+    mock_detector_cls, mock_logger_cls,
+):
+    """In manual collection_mode, tracker collection events do NOT persist."""
+    settings = _make_settings()
+    settings["stability_seconds"] = 0
+    settings["collection_mode"] = "manual"
+    zone_config = _make_zone_config()
+    mock_logger = mock_logger_cls.return_value
+    mock_logger.log_egg_detected.return_value = {
+        "type": "egg_detected",
+        "track_id": 1,
+        "size": "large",
+    }
+
+    pipeline = EggCounterPipeline(settings, zone_config)
+
+    mock_detector = MagicMock()
+    pipeline.detector = mock_detector
+
+    # Phase 1: egg appears, gets counted
+    mock_detector.detect_and_track.return_value = {
+        "track_ids": [1],
+        "boxes": [[200, 200, 400, 300]],
+        "confidences": [0.85],
+        "classes": [0],
+        "frame_number": 1,
+    }
+    pipeline.process_frame(MagicMock(), 0.0)
+    mock_detector.detect_and_track.return_value["frame_number"] = 2
+    pipeline.process_frame(MagicMock(), 0.0)
+
+    # Phase 2: all eggs leave (trigger collection timeout)
+    mock_detector.detect_and_track.return_value = {
+        "track_ids": [],
+        "boxes": [],
+        "confidences": [],
+        "classes": [],
+        "frame_number": 3,
+    }
+    # Process multiple frames past collection_timeout (default 5s)
+    pipeline.process_frame(MagicMock(), 1.0)
+    events = pipeline.process_frame(MagicMock(), 10.0)
+
+    # The tracker generates a "collected" event but in manual mode
+    # it should NOT be persisted to SQLite
+    mock_logger.log_eggs_collected.assert_not_called()
+
+
+@patch("egg_counter.pipeline.EggDatabaseLogger")
+@patch("egg_counter.pipeline.EggDetector")
 def test_process_frame_out_of_zone(mock_detector_cls, mock_logger_cls):
     """Detections outside the zone do not generate events."""
     settings = _make_settings()
