@@ -1,6 +1,5 @@
 """Tests for the SQLite-backed egg event logger."""
 
-import os
 import sqlite3
 import stat
 import sys

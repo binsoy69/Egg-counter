@@ -56,6 +56,7 @@ def tmp_settings_file(tmp_path):
         "confidence_threshold": 0.5,
         "stability_seconds": 3,
         "log_dir": "logs",
+        "db_path": "data/eggs.db",
         "frame_rate": 3,
         "bytetrack_config": "config/bytetrack_eggs.yaml",
         "location": {"lat": 40.0, "lon": -75.0},
