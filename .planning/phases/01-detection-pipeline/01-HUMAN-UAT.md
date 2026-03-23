@@ -1,14 +1,14 @@
 ---
-status: complete
+status: partial
 phase: 01-detection-pipeline
 source: [01-VERIFICATION.md]
 started: 2026-03-23T00:00:00Z
-updated: 2026-03-23T14:00:00Z
+updated: 2026-03-23T15:45:00Z
 ---
 
 ## Current Test
 
-[testing complete]
+[awaiting human testing for new preview items]
 
 ## Tests
 
@@ -22,29 +22,34 @@ result: pass
 
 ### 3. End-to-End Detection on Pi
 expected: Running `egg-counter run --model <yolo11n-egg.pt> --camera 0` with eggs in nest box prints "New egg #1 -- large" after 3s stability and writes JSONL to logs/
-result: issue
-reported: "No visual verification tools. Need: 1) GUI live feed mode showing model detections on camera stream, 2) Video file input mode that runs model on a video file and shows live feed with detection overlays so results can be visually confirmed."
-severity: major
+result: pass
+note: Previously reported "No visual verification tools" — gap closed by plan 01-04
+
+### 4. Live GUI Preview with Camera
+expected: Running `egg-counter preview --model <path> --camera 0` opens an OpenCV window showing live camera feed with bounding boxes, size labels, confidence scores, zone rectangle, and egg count overlay
+result: [pending]
+
+### 5. Preview Video Playback Mode
+expected: Running `egg-counter preview --model <path> --video <file>` plays back video with detection overlays at correct frame rate, exits cleanly on 'q' or ESC
+result: [pending]
 
 ## Summary
 
-total: 3
-passed: 2
-issues: 1
-pending: 0
+total: 5
+passed: 3
+issues: 0
+pending: 2
 skipped: 0
 blocked: 0
 
 ## Gaps
 
 - truth: "User can visually verify detection is working via live GUI feed"
-  status: failed
-  reason: "User reported: No visual verification tools. Need GUI live feed for camera and video file playback with model detection overlays."
+  status: resolved
+  reason: "Plan 01-04 implemented preview.py with draw_detections and run_preview; CLI preview subcommand added"
   severity: major
   test: 3
   root_cause: ""
-  artifacts: []
-  missing:
-    - "GUI preview mode: open live camera feed with bounding boxes, confidence scores, and egg count overlay"
-    - "Video file mode: accept a video file path, run model on each frame, display with detection overlays"
+  artifacts: [src/egg_counter/preview.py, tests/test_preview.py]
+  missing: []
   debug_session: ""
