@@ -2,6 +2,7 @@ camera_index: 0
 confidence_threshold: 0.5
 stability_seconds: 3
 log_dir: "logs"
+db_path: "data/eggs.db"
 frame_rate: 3
 bytetrack_config: "config/bytetrack_eggs.yaml"
 location:

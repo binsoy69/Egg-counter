@@ -43,6 +43,12 @@ def tmp_log_dir(tmp_path):
 
 
 @pytest.fixture
+def tmp_db_path(tmp_path):
+    """Provide a temporary SQLite database path."""
+    return str(tmp_path / "test_eggs.db")
+
+
+@pytest.fixture
 def tmp_settings_file(tmp_path):
     """Write a sample settings.yaml to a temp directory and return its path."""
     settings = {
