@@ -57,12 +57,12 @@ blocked: 0
   debug_session: ""
 
 - truth: "Zone setup tool supports video file input in addition to live camera"
-  status: failed
+  status: diagnosed
   reason: "User reported: I should be also be able to setup zone for videos"
   severity: major
   test: 5
-  root_cause: ""
-  artifacts: []
+  root_cause: "setup_zone.py only has --camera-index flag. No --video option exists to read a frame from a video file."
+  artifacts: [tools/setup_zone.py]
   missing:
     - "tools/setup_zone.py accepts --video <file> flag to load a frame from video instead of camera"
   debug_session: ""
