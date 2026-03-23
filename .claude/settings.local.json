@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd D:/codeNcraft/Egg-counter && node ~/.claude/get-shit-done/bin/gsd-tools.cjs commit \"docs\\(state\\): record phase 1 context session\" --files .planning/STATE.md)",
+      "WebSearch",
+      "Bash(cd D:/codeNcraft/Egg-counter && node \"$HOME/.claude/get-shit-done/bin/gsd-tools.cjs\" commit \"docs\\(phase-01\\): evolve PROJECT.md after phase completion\" --files .planning/PROJECT.md 2>&1)"
+    ]
+  }
+}

@@ -40,6 +40,11 @@ def main() -> None:
         default="config/zone.json",
         help="Path to zone.json (default: config/zone.json)",
     )
+    run_parser.add_argument(
+        "--video",
+        default=None,
+        help="Path to a video file (use instead of camera for testing)",
+    )
 
     # --- setup-zone command ---
     zone_parser = subparsers.add_parser(
@@ -69,7 +74,7 @@ def main() -> None:
         )
         pipeline = EggCounterPipeline(settings, zone_config)
         try:
-            pipeline.run(args.model, camera)
+            pipeline.run(args.model, camera, video_path=args.video)
         except KeyboardInterrupt:
             pipeline.stop()
 

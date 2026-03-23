@@ -142,23 +142,42 @@ class EggCounterPipeline:
 
         return logged_events
 
-    def run(self, model_path: str, camera_index: int = 0) -> None:
+    def run(
+        self,
+        model_path: str,
+        camera_index: int = 0,
+        video_path: str | None = None,
+    ) -> None:
         """Start the main detection loop.
 
         Args:
             model_path: Path to the YOLO model file.
-            camera_index: Camera device index.
+            camera_index: Camera device index (ignored if video_path set).
+            video_path: Path to a video file. If set, uses file instead of camera.
         """
         self.setup(model_path)
 
-        # Open camera with platform-appropriate backend
-        if sys.platform == "linux":
-            cap = cv2.VideoCapture(camera_index, cv2.CAP_V4L2)
+        if video_path:
+            cap = cv2.VideoCapture(video_path)
+            if not cap.isOpened():
+                print(f"Error: cannot open video file '{video_path}'")
+                return
+            source_fps = cap.get(cv2.CAP_PROP_FPS) or self.frame_rate
+            total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+            print(
+                f"Playing video: {video_path} "
+                f"({total_frames} frames @ {source_fps:.1f} fps)"
+            )
         else:
-            cap = cv2.VideoCapture(camera_index)
-
-        cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
-        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+            # Open camera with platform-appropriate backend
+            if sys.platform == "linux":
+                cap = cv2.VideoCapture(camera_index, cv2.CAP_V4L2)
+            else:
+                cap = cv2.VideoCapture(camera_index)
+            cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+            cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+            source_fps = None
+            total_frames = None
 
         print("Egg Counter started. Press Ctrl+C to stop.")
 
@@ -177,20 +196,30 @@ class EggCounterPipeline:
 
         try:
             while self.running and cap.isOpened():
-                # Check daylight if location configured
-                if use_daylight and not is_daylight(lat, lon):
+                # Check daylight if location configured (skip for video files)
+                if not video_path and use_daylight and not is_daylight(lat, lon):
                     wait_for_daylight(lat, lon)
                     continue
 
                 ret, frame = cap.read()
                 if not ret:
+                    if video_path:
+                        print("Video ended.")
+                        break
                     print("Warning: failed to read frame, retrying...")
                     time.sleep(1.0)
                     continue
 
-                self.process_frame(frame, time.time())
+                # Use video position as timestamp for video files,
+                # real time for camera
+                if video_path:
+                    ts = cap.get(cv2.CAP_PROP_POS_MSEC) / 1000.0
+                else:
+                    ts = time.time()
 
-                # Maintain target frame rate
+                self.process_frame(frame, ts)
+
+                # Maintain target frame rate (real-time pacing for video)
                 time.sleep(1.0 / self.frame_rate)
         finally:
             cap.release()
