@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: Ready to plan
-stopped_at: Phase 2 context gathered
-last_updated: "2026-03-23T11:52:50.752Z"
+status: Human verification required
+stopped_at: Phase 2 hardware reboot durability check pending
+last_updated: "2026-03-23T13:33:39.5724494Z"
 progress:
   total_phases: 4
   completed_phases: 1
-  total_plans: 5
-  completed_plans: 5
+  total_plans: 6
+  completed_plans: 6
 ---
 
 # Project State
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-19)
 
 **Core value:** Accurately count and classify eggs as they appear in nest boxes, with live results visible on a remote-accessible dashboard.
-**Current focus:** Phase 01 — detection-pipeline
+**Current focus:** Phase 02 — data-persistence verification
 
 ## Current Position
 
-Phase: 2
-Plan: Not started
+Phase: 02 (data-persistence) — AWAITING HUMAN VERIFICATION
+Plan: 1 of 1 complete
 
 ## Performance Metrics
 
@@ -68,6 +68,9 @@ Recent decisions affecting current work:
 - [Phase 01]: Platform-aware camera init: V4L2 backend on Linux, default on Windows
 - [Phase 01]: Lazy import of preview module in CLI to avoid cv2 GUI in headless mode
 - [Phase 01]: Video and camera modes share identical downstream logic in setup_zone.py
+- [Phase 02]: Replaced JSONL pipeline logging with SQLite WAL persistence via EggDatabaseLogger
+- [Phase 02]: Startup egg_count restoration is collection-aware and derived from SQLite state
+- [Phase 02]: Added EggRepository query layer for Phase 3 dashboard history views
 
 ### Pending Todos
 
@@ -75,11 +78,12 @@ None yet.
 
 ### Blockers/Concerns
 
+- Phase 2 still needs a physical Pi reboot/power-cycle verification to confirm SD-card durability on target hardware.
 - Phase 1 requires annotated images from the actual nest box environment for model training. If the nest box is not set up or has no eggs, training cannot begin.
 - NCNN inference speed on Pi 5 must be benchmarked on actual hardware. If below acceptable FPS, architecture adjustment needed.
 
 ## Session Continuity
 
-Last session: 2026-03-23T11:52:50.736Z
-Stopped at: Phase 2 context gathered
+Last session: 2026-03-23T13:33:39.5724494Z
+Stopped at: Phase 2 hardware reboot durability check pending
 Resume file: .planning/phases/02-data-persistence/02-CONTEXT.md
