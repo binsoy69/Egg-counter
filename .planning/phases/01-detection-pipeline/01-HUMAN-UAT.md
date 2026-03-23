@@ -1,14 +1,14 @@
 ---
-status: partial
+status: complete
 phase: 01-detection-pipeline
 source: [01-VERIFICATION.md]
 started: 2026-03-23T00:00:00Z
-updated: 2026-03-23T15:45:00Z
+updated: 2026-03-23T16:00:00Z
 ---
 
 ## Current Test
 
-[awaiting human testing for new preview items]
+[testing complete]
 
 ## Tests
 
@@ -27,18 +27,20 @@ note: Previously reported "No visual verification tools" — gap closed by plan 
 
 ### 4. Live GUI Preview with Camera
 expected: Running `egg-counter preview --model <path> --camera 0` opens an OpenCV window showing live camera feed with bounding boxes, size labels, confidence scores, zone rectangle, and egg count overlay
-result: [pending]
+result: pass
 
 ### 5. Preview Video Playback Mode
 expected: Running `egg-counter preview --model <path> --video <file>` plays back video with detection overlays at correct frame rate, exits cleanly on 'q' or ESC
-result: [pending]
+result: issue
+reported: "I should be also be able to setup zone for videos"
+severity: major
 
 ## Summary
 
 total: 5
-passed: 3
-issues: 0
-pending: 2
+passed: 4
+issues: 1
+pending: 0
 skipped: 0
 blocked: 0
 
@@ -52,4 +54,15 @@ blocked: 0
   root_cause: ""
   artifacts: [src/egg_counter/preview.py, tests/test_preview.py]
   missing: []
+  debug_session: ""
+
+- truth: "Zone setup tool supports video file input in addition to live camera"
+  status: failed
+  reason: "User reported: I should be also be able to setup zone for videos"
+  severity: major
+  test: 5
+  root_cause: ""
+  artifacts: []
+  missing:
+    - "tools/setup_zone.py accepts --video <file> flag to load a frame from video instead of camera"
   debug_session: ""
