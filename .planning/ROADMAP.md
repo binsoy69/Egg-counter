@@ -87,5 +87,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 |-------|----------------|--------|-----------|
 | 1. Detection Pipeline | 3/4 | Gap closure | - |
 | 2. Data Persistence | 1/1 | Human verification | - |
-| 3. Web Dashboard | 0/0 | Not started | - |
+| 3. Web Dashboard | 1/2 | In progress | - |
 | 4. Remote Access and Hardening | 0/0 | Not started | - |

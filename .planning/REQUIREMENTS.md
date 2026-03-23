@@ -16,9 +16,9 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Dashboard
 
-- [ ] **DASH-01**: User can view today's running egg count broken down by size
-- [ ] **DASH-02**: Dashboard updates in real-time via WebSocket when an egg is detected
-- [ ] **DASH-03**: User can mark eggs as collected via a "collected" action on the dashboard
+- [x] **DASH-01**: User can view today's running egg count broken down by size
+- [x] **DASH-02**: Dashboard updates in real-time via WebSocket when an egg is detected
+- [x] **DASH-03**: User can mark eggs as collected via a "collected" action on the dashboard
 - [ ] **DASH-04**: Dashboard is mobile-responsive for phone viewing
 
 ### Data
@@ -78,9 +78,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DET-02 | Phase 1 | Complete |
 | DET-03 | Phase 1 | Complete |
 | DET-04 | Phase 1 | Complete |
-| DASH-01 | Phase 3 | Pending |
-| DASH-02 | Phase 3 | Pending |
-| DASH-03 | Phase 3 | Pending |
+| DASH-01 | Phase 3 | Complete |
+| DASH-02 | Phase 3 | Complete |
+| DASH-03 | Phase 3 | Complete |
 | DASH-04 | Phase 3 | Pending |
 | DATA-01 | Phase 2 | Pending |
 | INFRA-01 | Phase 4 | Pending |
