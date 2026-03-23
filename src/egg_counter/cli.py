@@ -46,6 +46,37 @@ def main() -> None:
         help="Path to a video file (use instead of camera for testing)",
     )
 
+    # --- preview command ---
+    preview_parser = subparsers.add_parser(
+        "preview", help="Run detection with live GUI overlay for visual verification"
+    )
+    preview_parser.add_argument(
+        "--model",
+        required=True,
+        help="Path to YOLO model (.pt file or NCNN model directory)",
+    )
+    preview_parser.add_argument(
+        "--camera",
+        type=int,
+        default=0,
+        help="Camera index (default: 0)",
+    )
+    preview_parser.add_argument(
+        "--config",
+        default="config/settings.yaml",
+        help="Path to settings.yaml (default: config/settings.yaml)",
+    )
+    preview_parser.add_argument(
+        "--zone",
+        default="config/zone.json",
+        help="Path to zone.json (default: config/zone.json)",
+    )
+    preview_parser.add_argument(
+        "--video",
+        default=None,
+        help="Path to a video file (use instead of camera for testing)",
+    )
+
     # --- setup-zone command ---
     zone_parser = subparsers.add_parser(
         "setup-zone", help="Run zone configuration tool"
@@ -77,6 +108,16 @@ def main() -> None:
             pipeline.run(args.model, camera, video_path=args.video)
         except KeyboardInterrupt:
             pipeline.stop()
+
+    elif args.command == "preview":
+        from egg_counter.preview import run_preview
+        run_preview(
+            model_path=args.model,
+            camera_index=args.camera,
+            video_path=args.video,
+            config_path=args.config,
+            zone_path=args.zone,
+        )
 
     elif args.command == "setup-zone":
         subprocess.run(
