@@ -31,10 +31,10 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 4 plans
 
 Plans:
-- [ ] 01-01-PLAN.md — Project scaffolding, config, zone, logger, scheduler, and zone setup tool
-- [ ] 01-02-PLAN.md — Size classifier (bbox ratio method) and egg tracker (de-duplication, stability, restart)
+- [x] 01-01-PLAN.md — Project scaffolding, config, zone, logger, scheduler, and zone setup tool
+- [x] 01-02-PLAN.md — Size classifier (bbox ratio method) and egg tracker (de-duplication, stability, restart)
 - [x] 01-03-PLAN.md — YOLO detector wrapper, pipeline integration, and CLI entry point
-- [ ] 01-04-PLAN.md — GUI preview mode for visual verification (gap closure)
+- [x] 01-04-PLAN.md — GUI preview mode for visual verification (gap closure)
 
 ### Phase 2: Data Persistence
 **Goal**: Egg detection events are durably stored and queryable, surviving reboots and power loss
