@@ -41,13 +41,13 @@ Plans:
 **Depends on**: Phase 1
 **Requirements**: DATA-01
 **Success Criteria** (what must be TRUE):
-  1. Detected eggs are written to a SQLite database on USB SSD immediately upon detection
+  1. Detected eggs are written to a SQLite database on the Pi's SD card immediately upon detection
   2. After a Pi reboot, the database retains all previously recorded egg events and today's count resumes correctly
   3. User can query historical egg production data grouped by day and by size category
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 02-01: TBD
+- [ ] 02-01-PLAN.md — SQLite logger (drop-in replacement), query/DAO class, and pipeline integration
 
 ### Phase 3: Web Dashboard
 **Goal**: User can view live egg counts, manage collections, and see production trends from a phone browser on the local network
@@ -86,6 +86,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Detection Pipeline | 3/4 | Gap closure | - |
-| 2. Data Persistence | 0/0 | Not started | - |
+| 2. Data Persistence | 0/1 | Planning complete | - |
 | 3. Web Dashboard | 0/0 | Not started | - |
 | 4. Remote Access and Hardening | 0/0 | Not started | - |
