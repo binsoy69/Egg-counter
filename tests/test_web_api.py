@@ -208,3 +208,95 @@ class TestAggregates:
         assert best["total"] == 3
         assert top["size"] == "large"
         assert top["total"] == 3
+
+
+# --- FastAPI route tests ---
+
+
+@pytest.fixture
+def _seeded_app(tmp_db_path):
+    """Create a FastAPI app with seeded test data."""
+    _initialize_db(tmp_db_path)
+    conn = sqlite3.connect(tmp_db_path)
+    try:
+        _insert_egg(conn, "2026-03-23", "large",
+                    timestamp="2026-03-23T10:00:00+00:00")
+        _insert_egg(conn, "2026-03-23", "medium",
+                    timestamp="2026-03-23T11:00:00+00:00")
+        _insert_egg(conn, "2026-03-20", "jumbo")
+        conn.commit()
+    finally:
+        conn.close()
+
+    settings = {
+        "db_path": tmp_db_path,
+        "web_host": "127.0.0.1",
+        "web_port": 8000,
+        "dashboard_title": "EggSentry",
+        "collection_mode": "manual",
+    }
+    zone_config = {
+        "x1": 100, "y1": 100, "x2": 500, "y2": 400,
+        "nest_box_width_mm": 300.0,
+    }
+    from egg_counter.web.server import create_app
+    return create_app(settings, zone_config)
+
+
+@pytest.mark.asyncio
+async def test_dashboard_api_returns_snapshot(tmp_db_path, _seeded_app):
+    """GET /api/dashboard returns a dashboard snapshot."""
+    from httpx import ASGITransport, AsyncClient
+
+    transport = ASGITransport(app=_seeded_app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        resp = await client.get("/api/dashboard")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert "today_total" in data
+    assert "production_series" in data
+
+
+@pytest.mark.asyncio
+async def test_history_api_applies_filters(tmp_db_path, _seeded_app):
+    """GET /api/history with size filter returns matching records."""
+    from httpx import ASGITransport, AsyncClient
+
+    transport = ASGITransport(app=_seeded_app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        resp = await client.get("/api/history?size=large")
+    assert resp.status_code == 200
+    data = resp.json()
+    for rec in data:
+        assert rec["size"] == "large"
+
+
+@pytest.mark.asyncio
+async def test_collect_api_persists_collection_and_returns_updated_snapshot(
+    tmp_db_path, _seeded_app
+):
+    """POST /api/collect persists a collection and returns updated snapshot."""
+    from httpx import ASGITransport, AsyncClient
+
+    transport = ASGITransport(app=_seeded_app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        resp = await client.post("/api/collect")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert "message" in data
+    assert "collected_count" in data
+    assert "snapshot" in data
+    # After collection, today's running count should be 0
+    assert data["snapshot"]["today_total"] == 0
+
+
+@pytest.mark.asyncio
+async def test_health_route_returns_ok(tmp_db_path, _seeded_app):
+    """GET /health returns status ok."""
+    from httpx import ASGITransport, AsyncClient
+
+    transport = ASGITransport(app=_seeded_app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        resp = await client.get("/health")
+    assert resp.status_code == 200
+    assert resp.json()["status"] == "ok"
