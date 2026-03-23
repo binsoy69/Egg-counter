@@ -12,12 +12,10 @@ Accurately count and classify eggs as they appear in nest boxes, with live resul
 
 ### Validated
 
-(None yet — ship to validate)
+- [x] Detect eggs in nest box using YOLO model on Raspberry Pi 5 — Validated in Phase 1: Detection Pipeline
+- [x] Classify egg size (small, medium, large, jumbo) via visual estimation — Validated in Phase 1: Detection Pipeline
 
 ### Active
-
-- [ ] Detect eggs in nest box using YOLO model on Raspberry Pi 5
-- [ ] Classify egg size (small, medium, large, jumbo) via visual estimation
 - [ ] Display running count of today's eggs broken down by size on web dashboard
 - [ ] Show historical egg production data with charts/trends over days and weeks
 - [ ] Push real-time updates from Pi to dashboard via WebSocket when eggs are detected
@@ -52,10 +50,10 @@ Accurately count and classify eggs as they appear in nest boxes, with live resul
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| YOLO for detection | User preference, strong real-time performance on edge devices | — Pending |
+| YOLO for detection | User preference, strong real-time performance on edge devices | Implemented (Phase 1) |
 | WebSocket for real-time updates | Instant push to dashboard when egg detected, no polling delay | — Pending |
-| Visual size estimation | No extra hardware needed, acceptable accuracy for hobby farm | — Pending |
+| Visual size estimation | No extra hardware needed, acceptable accuracy for hobby farm | Implemented (Phase 1) — bbox ratio method with USDA thresholds |
 | Remote access | User wants to check from phone anywhere, not just local network | — Pending |
 
 ---
-*Last updated: 2026-03-19 after initialization*
+*Last updated: 2026-03-23 after Phase 1 completion*
