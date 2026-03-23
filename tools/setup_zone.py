@@ -1,11 +1,12 @@
 """Interactive zone configuration tool.
 
-Captures a single frame from the camera, lets the user draw a rectangle
-around the nest box region, and saves the zone configuration to JSON.
+Captures a single frame from a camera or video file, lets the user draw a
+rectangle around the nest box region, and saves the zone configuration to JSON.
 
 Usage:
     python tools/setup_zone.py
     python tools/setup_zone.py --camera-index 1 --output config/zone.json
+    python tools/setup_zone.py --video path/to/video.mp4 --output config/zone.json
 """
 
 import argparse
@@ -30,6 +31,12 @@ def main():
         description="Configure the egg-detection zone by drawing a rectangle on a camera frame."
     )
     parser.add_argument(
+        "--video",
+        type=str,
+        default=None,
+        help="Path to a video file to extract a frame for zone setup (use instead of camera)",
+    )
+    parser.add_argument(
         "--camera-index",
         type=int,
         default=0,
@@ -43,25 +50,37 @@ def main():
     )
     args = parser.parse_args()
 
-    # Open camera
-    backend = get_camera_backend()
-    cap = cv2.VideoCapture(args.camera_index, backend)
+    if args.video:
+        # Load frame from video file
+        cap = cv2.VideoCapture(args.video)
+        if not cap.isOpened():
+            print(f"Error: Could not open video file {args.video}")
+            sys.exit(1)
+        ret, frame = cap.read()
+        cap.release()
+        if not ret:
+            print("Error: Could not read frame from video file")
+            sys.exit(1)
+    else:
+        # Original camera logic (unchanged)
+        backend = get_camera_backend()
+        cap = cv2.VideoCapture(args.camera_index, backend)
 
-    if not cap.isOpened():
-        # Retry without explicit backend
-        cap = cv2.VideoCapture(args.camera_index)
+        if not cap.isOpened():
+            # Retry without explicit backend
+            cap = cv2.VideoCapture(args.camera_index)
 
-    if not cap.isOpened():
-        print(f"Error: Could not open camera {args.camera_index}")
-        sys.exit(1)
+        if not cap.isOpened():
+            print(f"Error: Could not open camera {args.camera_index}")
+            sys.exit(1)
 
-    # Capture a single frame
-    ret, frame = cap.read()
-    cap.release()
+        # Capture a single frame
+        ret, frame = cap.read()
+        cap.release()
 
-    if not ret:
-        print("Error: Could not read frame from camera")
-        sys.exit(1)
+        if not ret:
+            print("Error: Could not read frame from camera")
+            sys.exit(1)
 
     frame_height, frame_width = frame.shape[:2]
 
