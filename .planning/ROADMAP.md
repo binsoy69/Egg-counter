@@ -73,10 +73,11 @@ Plans:
   1. User can open the dashboard from a phone on cellular data (outside the local network) via a stable HTTPS URL
   2. After a Pi reboot or power cycle, the detection process and web server start automatically without manual intervention
   3. If the detection process crashes, it restarts automatically within seconds
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 04-01: TBD
+- [x] 04-01 - Application-managed authentication for dashboard, API, and websocket access
+- [x] 04-02 - Deployment/systemd/cloudflared artifacts and operator runbook
 
 ## Progress
 
@@ -88,4 +89,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 | 1. Detection Pipeline | 3/4 | Gap closure | - |
 | 2. Data Persistence | 1/1 | Human verification | - |
 | 3. Web Dashboard | 1/2 | In progress | - |
-| 4. Remote Access and Hardening | 0/0 | Not started | - |
+| 4. Remote Access and Hardening | 2/2 | Human verification | - |

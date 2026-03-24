@@ -1,0 +1,7 @@
+tunnel: eggsentry
+credentials-file: /etc/cloudflared/eggsentry.json
+
+ingress:
+  - hostname: eggs.example.trycloudflare.com
+    service: http://127.0.0.1:8000
+  - service: http_status:404

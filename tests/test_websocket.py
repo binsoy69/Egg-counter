@@ -4,7 +4,9 @@ import sqlite3
 from datetime import date
 
 import pytest
+from fastapi import status
 
+from egg_counter.auth import hash_password
 from egg_counter.db import EggDatabaseLogger
 from egg_counter.repository import EggRepository
 
@@ -43,6 +45,12 @@ def _make_app(tmp_db_path):
         "web_port": 8000,
         "dashboard_title": "EggSentry",
         "collection_mode": "manual",
+        "auth_enabled": True,
+        "auth_username": "keeper",
+        "auth_password_hash": hash_password("farm-secret", "pepper-salt"),
+        "auth_cookie_name": "egg_counter_session",
+        "session_secret": "super-secret-session-key",
+        "session_max_age": 1209600,
     }
     zone_config = {
         "x1": 100, "y1": 100, "x2": 500, "y2": 400,
@@ -57,8 +65,15 @@ def test_websocket_receives_initial_snapshot(tmp_db_path):
     app = _make_app(tmp_db_path)
 
     from starlette.testclient import TestClient
-    client = TestClient(app)
-    with client.websocket_connect("/ws") as ws:
+    client = TestClient(app, base_url="https://testserver")
+    login_response = client.post(
+        "/login",
+        content="username=keeper&password=farm-secret",
+        headers={"content-type": "application/x-www-form-urlencoded"},
+        follow_redirects=False,
+    )
+    assert login_response.status_code == 303
+    with client.websocket_connect("wss://testserver/ws") as ws:
         data = ws.receive_json()
         assert data["type"] == "snapshot"
         assert "snapshot" in data
@@ -79,6 +94,12 @@ def test_websocket_receives_egg_detected_event(tmp_db_path):
         "web_port": 8000,
         "dashboard_title": "EggSentry",
         "collection_mode": "manual",
+        "auth_enabled": True,
+        "auth_username": "keeper",
+        "auth_password_hash": hash_password("farm-secret", "pepper-salt"),
+        "auth_cookie_name": "egg_counter_session",
+        "session_secret": "super-secret-session-key",
+        "session_max_age": 1209600,
     }
     zone_config = {
         "x1": 100, "y1": 100, "x2": 500, "y2": 400,
@@ -108,8 +129,15 @@ def test_websocket_disconnect_cleans_up_connection(tmp_db_path):
     from egg_counter.web.server import _get_hub
     from starlette.testclient import TestClient
 
-    client = TestClient(app)
-    with client.websocket_connect("/ws") as ws:
+    client = TestClient(app, base_url="https://testserver")
+    login_response = client.post(
+        "/login",
+        content="username=keeper&password=farm-secret",
+        headers={"content-type": "application/x-www-form-urlencoded"},
+        follow_redirects=False,
+    )
+    assert login_response.status_code == 303
+    with client.websocket_connect("wss://testserver/ws") as ws:
         ws.receive_json()  # consume initial snapshot
         hub = _get_hub(app)
         assert len(hub.connections) >= 1
@@ -117,3 +145,17 @@ def test_websocket_disconnect_cleans_up_connection(tmp_db_path):
     # After disconnect
     hub = _get_hub(app)
     assert len(hub.connections) == 0
+
+
+def test_websocket_requires_authenticated_session(tmp_db_path):
+    """WebSocket connections are rejected without an authenticated session."""
+    app = _make_app(tmp_db_path)
+
+    from starlette.testclient import TestClient
+    from starlette.websockets import WebSocketDisconnect
+
+    client = TestClient(app, base_url="https://testserver")
+    with pytest.raises(WebSocketDisconnect) as exc_info:
+        with client.websocket_connect("/ws"):
+            pass
+    assert exc_info.value.code == status.WS_1008_POLICY_VIOLATION

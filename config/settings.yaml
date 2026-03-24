@@ -13,3 +13,6 @@ web_port: 8000
 web_reload: false
 dashboard_title: "EggSentry"
 collection_mode: "manual"
+auth_enabled: true
+auth_cookie_name: "egg_counter_session"
+session_max_age: 1209600

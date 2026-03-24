@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: Ready to plan
-stopped_at: Completed 03-01-PLAN.md
-last_updated: "2026-03-24T02:03:48.732Z"
+status: Human verification required
+stopped_at: Awaiting Phase 04 hardware validation
+last_updated: "2026-03-24T04:16:00.000Z"
 progress:
   total_phases: 4
   completed_phases: 3
-  total_plans: 7
+  total_plans: 9
   completed_plans: 8
 ---
 
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-19)
 
 **Core value:** Accurately count and classify eggs as they appear in nest boxes, with live results visible on a remote-accessible dashboard.
-**Current focus:** Phase 03 — web-dashboard
+**Current focus:** Phase 04 — remote-access-and-hardening
 
 ## Current Position
 
-Phase: 4
-Plan: Not started
+Phase: 04 (remote-access-and-hardening) — HUMAN VERIFICATION
+Plan: 2 of 2 complete
 
 ## Performance Metrics
 
@@ -82,6 +82,7 @@ None yet.
 
 ### Blockers/Concerns
 
+- Phase 4 still requires Raspberry Pi deployment validation for Cloudflare Tunnel reachability, reboot startup, and crash recovery.
 - Phase 2 still needs a physical Pi reboot/power-cycle verification to confirm SD-card durability on target hardware.
 - Phase 1 requires annotated images from the actual nest box environment for model training. If the nest box is not set up or has no eggs, training cannot begin.
 - NCNN inference speed on Pi 5 must be benchmarked on actual hardware. If below acceptable FPS, architecture adjustment needed.

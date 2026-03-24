@@ -1,10 +1,14 @@
 """Tests for web API: repository-backed dashboard, history, and collection."""
 
 import sqlite3
-from datetime import date, datetime, timezone
+from datetime import date
+from pathlib import Path
 
 import pytest
+from httpx import ASGITransport, AsyncClient
 
+from egg_counter.auth import hash_password, verify_password
+from egg_counter.config import load_settings
 from egg_counter.db import EggDatabaseLogger
 from egg_counter.repository import EggRepository
 
@@ -210,6 +214,55 @@ class TestAggregates:
         assert top["total"] == 3
 
 
+def test_verify_password_accepts_matching_scrypt_hash():
+    """Matching password validates against scrypt hash format."""
+    stored_hash = hash_password("farm-secret", "pepper-salt")
+
+    assert verify_password("farm-secret", stored_hash) is True
+
+
+def test_verify_password_rejects_wrong_password():
+    """Wrong password fails verification."""
+    stored_hash = hash_password("farm-secret", "pepper-salt")
+
+    assert verify_password("wrong-secret", stored_hash) is False
+
+
+def test_load_settings_overrides_auth_from_environment(
+    monkeypatch: pytest.MonkeyPatch,
+):
+    """Environment auth values override YAML defaults."""
+    config_path = Path("tests/_auth_settings.yaml")
+    monkeypatch.setenv("EGG_COUNTER_AUTH_USERNAME", "keeper")
+    monkeypatch.setenv(
+        "EGG_COUNTER_AUTH_PASSWORD_HASH",
+        "scrypt$salty$deadbeef",
+    )
+    monkeypatch.setenv("EGG_COUNTER_SESSION_SECRET", "super-secret")
+    monkeypatch.setenv("EGG_COUNTER_SESSION_MAX_AGE", "86400")
+    config_path.write_text(
+        "\n".join(
+            [
+                'dashboard_title: "EggSentry"',
+                "auth_enabled: true",
+                'auth_cookie_name: "egg_counter_session"',
+                "session_max_age: 1209600",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    try:
+        settings = load_settings(str(config_path))
+    finally:
+        config_path.unlink(missing_ok=True)
+
+    assert settings["auth_username"] == "keeper"
+    assert settings["auth_password_hash"] == "scrypt$salty$deadbeef"
+    assert settings["session_secret"] == "super-secret"
+    assert settings["session_max_age"] == 86400
+
+
 # --- FastAPI route tests ---
 
 
@@ -234,6 +287,12 @@ def _seeded_app(tmp_db_path):
         "web_port": 8000,
         "dashboard_title": "EggSentry",
         "collection_mode": "manual",
+        "auth_enabled": True,
+        "auth_username": "keeper",
+        "auth_password_hash": hash_password("farm-secret", "pepper-salt"),
+        "auth_cookie_name": "egg_counter_session",
+        "session_secret": "super-secret-session-key",
+        "session_max_age": 1209600,
     }
     zone_config = {
         "x1": 100, "y1": 100, "x2": 500, "y2": 400,
@@ -243,13 +302,26 @@ def _seeded_app(tmp_db_path):
     return create_app(settings, zone_config)
 
 
+async def _login(client: AsyncClient) -> None:
+    """Authenticate a test client against the login route."""
+    response = await client.post(
+        "/login",
+        content="username=keeper&password=farm-secret",
+        headers={"content-type": "application/x-www-form-urlencoded"},
+        follow_redirects=False,
+    )
+    assert response.status_code == 303
+
+
 @pytest.mark.asyncio
 async def test_dashboard_api_returns_snapshot(tmp_db_path, _seeded_app):
     """GET /api/dashboard returns a dashboard snapshot."""
-    from httpx import ASGITransport, AsyncClient
-
     transport = ASGITransport(app=_seeded_app)
-    async with AsyncClient(transport=transport, base_url="http://test") as client:
+    async with AsyncClient(
+        transport=transport,
+        base_url="https://test",
+    ) as client:
+        await _login(client)
         resp = await client.get("/api/dashboard")
     assert resp.status_code == 200
     data = resp.json()
@@ -260,10 +332,12 @@ async def test_dashboard_api_returns_snapshot(tmp_db_path, _seeded_app):
 @pytest.mark.asyncio
 async def test_history_api_applies_filters(tmp_db_path, _seeded_app):
     """GET /api/history with size filter returns matching records."""
-    from httpx import ASGITransport, AsyncClient
-
     transport = ASGITransport(app=_seeded_app)
-    async with AsyncClient(transport=transport, base_url="http://test") as client:
+    async with AsyncClient(
+        transport=transport,
+        base_url="https://test",
+    ) as client:
+        await _login(client)
         resp = await client.get("/api/history?size=large")
     assert resp.status_code == 200
     data = resp.json()
@@ -276,10 +350,12 @@ async def test_collect_api_persists_collection_and_returns_updated_snapshot(
     tmp_db_path, _seeded_app
 ):
     """POST /api/collect persists a collection and returns updated snapshot."""
-    from httpx import ASGITransport, AsyncClient
-
     transport = ASGITransport(app=_seeded_app)
-    async with AsyncClient(transport=transport, base_url="http://test") as client:
+    async with AsyncClient(
+        transport=transport,
+        base_url="https://test",
+    ) as client:
+        await _login(client)
         resp = await client.post("/api/collect")
     assert resp.status_code == 200
     data = resp.json()
@@ -293,10 +369,77 @@ async def test_collect_api_persists_collection_and_returns_updated_snapshot(
 @pytest.mark.asyncio
 async def test_health_route_returns_ok(tmp_db_path, _seeded_app):
     """GET /health returns status ok."""
-    from httpx import ASGITransport, AsyncClient
-
     transport = ASGITransport(app=_seeded_app)
-    async with AsyncClient(transport=transport, base_url="http://test") as client:
+    async with AsyncClient(
+        transport=transport,
+        base_url="https://test",
+    ) as client:
         resp = await client.get("/health")
     assert resp.status_code == 200
     assert resp.json()["status"] == "ok"
+
+
+@pytest.mark.asyncio
+async def test_dashboard_redirects_to_login_when_unauthenticated(
+    tmp_db_path,
+    _seeded_app,
+):
+    """GET /dashboard redirects to the login page without a session."""
+    transport = ASGITransport(app=_seeded_app)
+    async with AsyncClient(
+        transport=transport,
+        base_url="https://test",
+    ) as client:
+        resp = await client.get("/dashboard", follow_redirects=False)
+    assert resp.status_code == 303
+    assert resp.headers["location"] == "/login"
+
+
+@pytest.mark.asyncio
+async def test_api_dashboard_returns_401_when_unauthenticated(
+    tmp_db_path,
+    _seeded_app,
+):
+    """GET /api/dashboard is blocked until a session exists."""
+    transport = ASGITransport(app=_seeded_app)
+    async with AsyncClient(
+        transport=transport,
+        base_url="https://test",
+    ) as client:
+        resp = await client.get("/api/dashboard")
+    assert resp.status_code == 401
+    assert resp.json()["detail"] == "Authentication required"
+
+
+@pytest.mark.asyncio
+async def test_login_sets_session_cookie(tmp_db_path, _seeded_app):
+    """Successful login sets the configured session cookie."""
+    transport = ASGITransport(app=_seeded_app)
+    async with AsyncClient(
+        transport=transport,
+        base_url="https://test",
+    ) as client:
+        resp = await client.post(
+            "/login",
+            content="username=keeper&password=farm-secret",
+            headers={"content-type": "application/x-www-form-urlencoded"},
+            follow_redirects=False,
+        )
+    assert resp.status_code == 303
+    assert resp.headers["location"] == "/dashboard"
+    assert "egg_counter_session=" in resp.headers["set-cookie"]
+
+
+@pytest.mark.asyncio
+async def test_logout_clears_session(tmp_db_path, _seeded_app):
+    """Logout clears the session and returns to the login page."""
+    transport = ASGITransport(app=_seeded_app)
+    async with AsyncClient(
+        transport=transport,
+        base_url="https://test",
+    ) as client:
+        await _login(client)
+        resp = await client.post("/logout", follow_redirects=False)
+    assert resp.status_code == 303
+    assert resp.headers["location"] == "/login"
+    assert "egg_counter_session=null" in resp.headers["set-cookie"]

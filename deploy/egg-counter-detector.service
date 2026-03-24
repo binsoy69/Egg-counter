@@ -1,0 +1,15 @@
+[Unit]
+Description=Egg Counter detector service
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/egg-counter
+EnvironmentFile=/etc/egg-counter/egg-counter.env
+ExecStart=/usr/bin/env egg-counter run --model ${EGG_COUNTER_MODEL_PATH} --config /opt/egg-counter/config/settings.yaml --zone /opt/egg-counter/config/zone.json
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

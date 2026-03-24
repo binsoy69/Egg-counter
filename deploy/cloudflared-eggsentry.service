@@ -1,0 +1,14 @@
+[Unit]
+Description=Cloudflare Tunnel for Egg Counter dashboard
+After=network-online.target egg-counter-dashboard.service
+Requires=egg-counter-dashboard.service
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/egg-counter
+ExecStart=/usr/bin/cloudflared tunnel --config /opt/egg-counter/deploy/cloudflared-config.yml run eggsentry
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
