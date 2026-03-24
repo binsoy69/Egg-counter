@@ -1,15 +1,16 @@
-"""FastAPI application for the egg counter dashboard.
-
-Provides JSON API routes, WebSocket endpoint, and HTML page placeholders.
-"""
+"""FastAPI application for the egg counter dashboard."""
 
 from __future__ import annotations
 
 from datetime import date
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 from fastapi import FastAPI, Query, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+from starlette.requests import Request
 
 from egg_counter.db import EggDatabaseLogger
 from egg_counter.repository import EggRepository
@@ -47,29 +48,62 @@ def create_app(
     app.state.hub = WebSocketHub()
 
     db_path = settings.get("db_path", "data/eggs.db")
+    web_root = Path(__file__).resolve().parent
+    templates = Jinja2Templates(directory=str(web_root / "templates"))
+    app.mount(
+        "/static",
+        StaticFiles(directory=str(web_root / "static")),
+        name="static",
+    )
 
-    # --- HTML routes (placeholders for Plan 02 template wiring) ---
+    def _template_context(request: Request, page: str) -> dict:
+        return {
+            "request": request,
+            "title": title,
+            "active_page": page,
+        }
+
+    # --- HTML routes ---
 
     @app.get("/", response_class=HTMLResponse)
-    async def dashboard_page():
-        return HTMLResponse("<html><body><h1>EggSentry Dashboard</h1></body></html>")
+    async def dashboard_root(request: Request):
+        return templates.TemplateResponse(
+            request,
+            "dashboard.html",
+            _template_context(request, "dashboard"),
+        )
+
+    @app.get("/dashboard", response_class=HTMLResponse)
+    async def dashboard_page(request: Request):
+        return templates.TemplateResponse(
+            request,
+            "dashboard.html",
+            _template_context(request, "dashboard"),
+        )
 
     @app.get("/history", response_class=HTMLResponse)
-    async def history_page():
-        return HTMLResponse("<html><body><h1>EggSentry History</h1></body></html>")
+    async def history_page(request: Request):
+        return templates.TemplateResponse(
+            request,
+            "history.html",
+            _template_context(request, "history"),
+        )
 
     # --- JSON API routes ---
 
+    def _load_snapshot(period: str = "weekly") -> dict:
+        repo = EggRepository(db_path)
+        try:
+            return repo.get_dashboard_snapshot(date.today(), period)
+        finally:
+            repo.close()
+
     @app.get("/api/dashboard")
+    @app.get("/api/dashboard/snapshot")
     async def api_dashboard(
         period: str = Query("weekly", pattern="^(weekly|monthly|yearly)$"),
     ):
-        repo = EggRepository(db_path)
-        try:
-            snapshot = repo.get_dashboard_snapshot(date.today(), period)
-        finally:
-            repo.close()
-        return snapshot
+        return _load_snapshot(period)
 
     @app.get("/api/history")
     async def api_history(
@@ -93,14 +127,11 @@ def create_app(
         return records
 
     @app.post("/api/collect")
+    @app.post("/api/dashboard/collect")
     async def api_collect():
         # Get current running count from snapshot
-        repo = EggRepository(db_path)
-        try:
-            snapshot = repo.get_dashboard_snapshot(date.today(), "weekly")
-            current_count = snapshot["today_total"]
-        finally:
-            repo.close()
+        snapshot = _load_snapshot("weekly")
+        current_count = snapshot["today_total"]
 
         # Persist collection
         if current_count > 0:
@@ -109,11 +140,7 @@ def create_app(
             logger.close()
 
         # Rebuild snapshot after collection
-        repo = EggRepository(db_path)
-        try:
-            updated_snapshot = repo.get_dashboard_snapshot(date.today(), "weekly")
-        finally:
-            repo.close()
+        updated_snapshot = _load_snapshot("weekly")
 
         # Broadcast to WebSocket clients
         hub = _get_hub(app)
@@ -143,16 +170,13 @@ def create_app(
     # --- WebSocket ---
 
     @app.websocket("/ws")
+    @app.websocket("/ws/dashboard")
     async def websocket_endpoint(websocket: WebSocket):
         hub = _get_hub(app)
         await hub.connect(websocket)
         try:
             # Send initial snapshot
-            repo = EggRepository(db_path)
-            try:
-                snapshot = repo.get_dashboard_snapshot(date.today(), "weekly")
-            finally:
-                repo.close()
+            snapshot = _load_snapshot("weekly")
 
             event = hub.build_snapshot_event("snapshot", snapshot)
             await websocket.send_json(event)
