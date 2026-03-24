@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ title }} History</title>
+    <link rel="stylesheet" href="{{ request.url_for('static', path='styles.css') }}">
+  </head>
+  <body class="app-shell">
+    <div class="ambient-orb ambient-orb-left"></div>
+    <div class="ambient-orb ambient-orb-right"></div>
+    <header class="topbar">
+      <a class="brand" href="/dashboard" aria-label="EggSentry dashboard">
+        <span class="brand-mark">O</span>
+        <span class="brand-copy">
+          <strong>EggSentry</strong>
+          <span>USEP POULTRY</span>
+        </span>
+      </a>
+      <nav class="topnav" aria-label="Primary">
+        <a class="topnav-link" href="/dashboard">Dashboard</a>
+        <a class="topnav-link is-active" href="/history">History</a>
+        <button class="topnav-link is-stub" type="button" aria-disabled="true">Modify Camera</button>
+        <button class="topnav-link is-stub" type="button" aria-disabled="true">Logout</button>
+      </nav>
+    </header>
+
+    <main class="page page-history">
+      <section class="page-heading">
+        <p class="eyebrow">History</p>
+        <h1>Browse all egg records with filters</h1>
+      </section>
+
+      <section class="section-card filters-card">
+        <div class="filters-head">
+          <div>
+            <p class="filters-title">Filters</p>
+          </div>
+          <span id="history-total" class="record-total">0 records</span>
+        </div>
+        <form id="history-filters" class="filters-grid">
+          <label class="field">
+            <span>Size</span>
+            <select id="filter-size" name="size">
+              <option value="">All Sizes</option>
+              <option value="small">Small</option>
+              <option value="medium">Medium</option>
+              <option value="large">Large</option>
+              <option value="jumbo">Jumbo</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>From</span>
+            <input id="filter-from" name="from" type="date">
+          </label>
+          <label class="field">
+            <span>To</span>
+            <input id="filter-to" name="to" type="date">
+          </label>
+        </form>
+      </section>
+
+      <section class="section-card history-table-card">
+        <div class="history-table-head" aria-hidden="true">
+          <span>Date</span>
+          <span>Size</span>
+          <span>Date &amp; Time</span>
+        </div>
+        <div id="history-records" class="history-records"></div>
+      </section>
+    </main>
+
+    <script src="{{ request.url_for('static', path='history.js') }}" defer></script>
+  </body>
+</html>

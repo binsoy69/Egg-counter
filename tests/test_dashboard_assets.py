@@ -85,3 +85,27 @@ def test_styles_include_no_overflow_and_mobile_stack_guardrails(styles_css: str)
         "grid-template-columns: minmax(0, 1fr);",
     ):
         assert marker in styles_css
+
+
+def test_history_assets_contain_required_filters_and_url_state(
+    history_html: str,
+    history_js: str,
+) -> None:
+    for hook in (
+        'id="filter-size"',
+        'id="filter-from"',
+        'id="filter-to"',
+        'id="history-total"',
+        'id="history-records"',
+    ):
+        assert hook in history_html
+
+    for marker in (
+        "/api/history",
+        "size",
+        "from",
+        "to",
+        "URLSearchParams",
+        "data-timestamp",
+    ):
+        assert marker in history_js
