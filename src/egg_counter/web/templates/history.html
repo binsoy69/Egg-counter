@@ -17,6 +17,11 @@
           <span>USEP POULTRY</span>
         </span>
       </a>
+      <button class="nav-toggle" type="button" aria-label="Toggle menu" aria-expanded="false">
+        <span class="nav-toggle-bar"></span>
+        <span class="nav-toggle-bar"></span>
+        <span class="nav-toggle-bar"></span>
+      </button>
       <nav class="topnav" aria-label="Primary">
         <a class="topnav-link" href="/dashboard">Dashboard</a>
         <a class="topnav-link is-active" href="/history">History</a>
@@ -71,5 +76,13 @@
     </main>
 
     <script src="{{ request.url_for('static', path='history.js') }}" defer></script>
+    <script>
+      document.querySelector('.nav-toggle').addEventListener('click', function() {
+        const nav = document.querySelector('.topnav');
+        const open = nav.classList.toggle('is-open');
+        this.classList.toggle('is-open', open);
+        this.setAttribute('aria-expanded', open);
+      });
+    </script>
   </body>
 </html>

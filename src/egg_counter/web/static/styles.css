@@ -129,6 +129,41 @@ button {
   letter-spacing: 0.08em;
 }
 
+.nav-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0.5rem;
+  border: 1px solid var(--line);
+  border-radius: 0.75rem;
+  background: var(--surface);
+  cursor: pointer;
+}
+
+.nav-toggle-bar {
+  display: block;
+  width: 100%;
+  height: 2px;
+  background: var(--ink);
+  border-radius: 2px;
+  transition: transform 200ms ease, opacity 200ms ease;
+}
+
+.nav-toggle.is-open .nav-toggle-bar:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+
+.nav-toggle.is-open .nav-toggle-bar:nth-child(2) {
+  opacity: 0;
+}
+
+.nav-toggle.is-open .nav-toggle-bar:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
 .topnav {
   display: flex;
   flex-wrap: wrap;
@@ -656,11 +691,31 @@ button {
 @media (max-width: 719px) {
   .topbar {
     padding-top: 0.8rem;
+    flex-wrap: wrap;
+  }
+
+  .nav-toggle {
+    display: flex;
   }
 
   .topnav {
+    display: none;
+    width: 100%;
+    flex-direction: column;
+    gap: 0.35rem;
+    padding: 0.5rem 0;
+  }
+
+  .topnav.is-open {
+    display: flex;
+  }
+
+  .topnav-link {
     width: 100%;
     justify-content: flex-start;
+    min-height: 2.5rem;
+    padding: 0.6rem 1rem;
+    border-radius: 0.75rem;
   }
 
   .period-grid,

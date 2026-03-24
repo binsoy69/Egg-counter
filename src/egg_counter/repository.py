@@ -12,6 +12,39 @@ class EggRepository:
     def __init__(self, db_path: str = "data/eggs.db") -> None:
         self.conn = sqlite3.connect(db_path)
         self.conn.row_factory = sqlite3.Row
+        self._ensure_schema()
+
+    def _ensure_schema(self) -> None:
+        """Create tables if they don't exist (handles pre-Phase-2 databases)."""
+        self.conn.executescript(
+            """
+            CREATE TABLE IF NOT EXISTS egg_events (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                timestamp TEXT NOT NULL,
+                detected_date TEXT NOT NULL,
+                track_id INTEGER NOT NULL,
+                size TEXT NOT NULL,
+                confidence REAL NOT NULL,
+                bbox_x1 REAL NOT NULL,
+                bbox_y1 REAL NOT NULL,
+                bbox_x2 REAL NOT NULL,
+                bbox_y2 REAL NOT NULL,
+                size_method TEXT NOT NULL,
+                raw_measurement_mm REAL NOT NULL,
+                frame_number INTEGER NOT NULL
+            );
+            CREATE TABLE IF NOT EXISTS collection_events (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                timestamp TEXT NOT NULL,
+                collected_date TEXT NOT NULL,
+                count INTEGER NOT NULL
+            );
+            CREATE INDEX IF NOT EXISTS idx_egg_events_date
+            ON egg_events(detected_date);
+            CREATE INDEX IF NOT EXISTS idx_collection_date
+            ON collection_events(collected_date);
+            """
+        )
 
     def get_daily_summary(self, target_date: date) -> dict:
         """Return the total eggs and size breakdown for one day."""
