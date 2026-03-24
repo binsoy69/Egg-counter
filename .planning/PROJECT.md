@@ -14,13 +14,13 @@ Accurately count and classify eggs as they appear in nest boxes, with live resul
 
 - [x] Detect eggs in nest box using YOLO model on Raspberry Pi 5 — Validated in Phase 1: Detection Pipeline
 - [x] Classify egg size (small, medium, large, jumbo) via visual estimation — Validated in Phase 1: Detection Pipeline
+- [x] Display running count of today's eggs broken down by size on web dashboard — Validated in Phase 3: Web Dashboard
+- [x] Show historical egg production data with charts/trends over days and weeks — Validated in Phase 3: Web Dashboard
+- [x] Push real-time updates from Pi to dashboard via WebSocket when eggs are detected — Validated in Phase 3: Web Dashboard
+- [x] Alert/notification on dashboard when a new egg is detected — Validated in Phase 3: Web Dashboard (live toast)
 
 ### Active
-- [ ] Display running count of today's eggs broken down by size on web dashboard
-- [ ] Show historical egg production data with charts/trends over days and weeks
-- [ ] Push real-time updates from Pi to dashboard via WebSocket when eggs are detected
 - [ ] Dashboard accessible remotely from phone (not just local network)
-- [ ] Alert/notification on dashboard when a new egg is detected
 
 ### Out of Scope
 
@@ -51,9 +51,9 @@ Accurately count and classify eggs as they appear in nest boxes, with live resul
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
 | YOLO for detection | User preference, strong real-time performance on edge devices | Implemented (Phase 1) |
-| WebSocket for real-time updates | Instant push to dashboard when egg detected, no polling delay | — Pending |
+| WebSocket for real-time updates | Instant push to dashboard when egg detected, no polling delay | Implemented (Phase 3) — hub broadcasts to all connected clients |
 | Visual size estimation | No extra hardware needed, acceptable accuracy for hobby farm | Implemented (Phase 1) — bbox ratio method with USDA thresholds |
 | Remote access | User wants to check from phone anywhere, not just local network | — Pending |
 
 ---
-*Last updated: 2026-03-23 after Phase 1 completion*
+*Last updated: 2026-03-24 after Phase 3 completion*
