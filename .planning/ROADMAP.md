@@ -62,8 +62,8 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 03-01: TBD
-- [ ] 03-02: TBD
+- [x] 03-01: TBD
+- [x] 03-02: TBD
 
 ### Phase 4: Remote Access and Hardening
 **Goal**: The system is accessible from anywhere on a phone and runs reliably without manual intervention
